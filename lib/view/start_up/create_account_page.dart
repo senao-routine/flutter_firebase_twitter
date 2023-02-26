@@ -1,5 +1,10 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_twitter/model/account.dart';
+import 'package:flutter_firebase_twitter/model/utils/authentication.dart';
+import 'package:flutter_firebase_twitter/model/utils/firestore/users.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateAccountPage extends StatefulWidget {
@@ -26,6 +31,15 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         image = File(PickedFile.path);
       });
     }
+  }
+
+  Future<String> uploadImage(String uid) async {
+    final FirebaseStorage storageInstance = FirebaseStorage.instance;
+    final Reference ref = storageInstance.ref();
+    await ref.child(uid).putFile(image!);
+    String downloadUrl = await storageInstance.ref(uid).getDownloadURL();
+    print('image_path: $downloadUrl');
+    return downloadUrl;
   }
 
   @override
@@ -98,14 +112,30 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             ),
             SizedBox(height: 50),
             ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (namelController.text.isNotEmpty &&
                       userIdlController.text.isNotEmpty &&
                       selfIntroductionController.text.isNotEmpty &&
                       emaillController.text.isNotEmpty &&
                       passController.text.isNotEmpty &&
                       image != null) {
-                    Navigator.pop(context);
+                    var result = await Authentication.signUp(
+                        email: emaillController.text,
+                        pass: passController.text);
+                    if (result is UserCredential) {
+                      String imagePath = await uploadImage(result.user!.uid);
+                      Account newAccount = Account(
+                        id: result.user!.uid,
+                        name: namelController.text,
+                        userId: userIdlController.text,
+                        selfIntroduction: selfIntroductionController.text,
+                        imagePath: imagePath,
+                      );
+                      var _result = await UsersFirestore.setUser(newAccount);
+                      if (_result == true) {
+                        Navigator.pop(context);
+                      }
+                    }
                   }
                 },
                 child: Text('アカウント作成'))

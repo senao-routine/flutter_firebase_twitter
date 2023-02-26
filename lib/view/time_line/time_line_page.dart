@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_twitter/view/time_line/post_page.dart';
 import 'package:intl/intl.dart';
@@ -20,8 +21,8 @@ class _TimeLinePageState extends State<TimeLinePage> {
     userId: 'flutter_iabo',
     imagePath:
         'https://www.apple.com/ac/structured-data/images/knowledge_graph_logo.png?202005130254',
-    createdTime: DateTime.now(),
-    updatedTime: DateTime.now(),
+    createdTime: Timestamp.now(),
+    updatedTime: Timestamp.now(),
   );
 
   List<Post> postList = [

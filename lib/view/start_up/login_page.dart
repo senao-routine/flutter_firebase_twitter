@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_twitter/model/utils/authentication.dart';
 import 'package:flutter_firebase_twitter/view/screen.dart';
 import 'package:flutter_firebase_twitter/view/start_up/create_account_page.dart';
 
@@ -72,8 +73,12 @@ class _LoginPageState extends State<LoginPage> {
                 height: 70,
               ),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context,
+                onPressed: () async {
+                  var result = await Authentication.emailSignIn(
+                      email: emailController.text, pass: passlController.text);
+                  // if (result == true) {}
+                  //条件の中に入れるとページ遷移が起こらない
+                  Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => Screen()));
                 },
                 child: Text('emailでログイン'),
